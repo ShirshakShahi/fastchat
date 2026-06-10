@@ -1,8 +1,10 @@
 import type { IncomingMessage } from "http";
 import url from "url";
+import { randomUUID } from "crypto";
 import { log } from "../utils/log.ts";
 import { send } from "../utils/send.ts";
 import { publicUser } from "../utils/publicUser.ts";
+import { signToken, verifyToken } from "../utils/token.ts";
 import { routeMessage } from "./router.ts";
 import RoomManager from "../managers/RoomManager.ts";
 import type { Client, User } from "../types/types.ts";
@@ -22,19 +24,27 @@ export function handleSocket(ws: Client, req: IncomingMessage): void {
   const parsedUrl = url.parse(req.url!, true);
 
   const roomId = parsedUrl.query.roomId as string;
-  const userId = parsedUrl.query.userId as string;
+  const token = parsedUrl.query.token as string | undefined;
   const name =
     (parsedUrl.query.name as string)?.trim() ||
     `Guest-${Math.floor(Math.random() * 1000000)}`;
 
-  if (!roomId || !userId) {
+  if (!roomId) {
     send(ws, {
       type: "error",
-      payload: { message: "roomId and userId are required" },
+      payload: { message: "roomId is required" },
     });
-    ws.close(4001, "Missing roomId or userId");
+    ws.close(4001, "Missing roomId");
     return;
   }
+
+  const claims = token ? verifyToken(token) : null;
+  const userId = claims?.userId ?? randomUUID();
+
+  send(ws, {
+    type: "session",
+    payload: { userId, token: signToken(userId) },
+  });
 
   const roomManager = RoomManager.getInstance();
   const user: User = {
