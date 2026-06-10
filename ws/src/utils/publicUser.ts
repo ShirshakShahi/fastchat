@@ -1,5 +1,5 @@
-import type RoomManager from "../managers/RoomManager.js";
-import type { User } from "../types/types.js";
+import type RoomManager from "../managers/RoomManager.ts";
+import type { User } from "../types/types.ts";
 
 export function publicUser(roomManager: RoomManager, roomId: string, u: User) {
   return {

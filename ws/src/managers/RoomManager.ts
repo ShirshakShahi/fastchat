@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import type { WebSocket } from "ws";
-import { log } from "../utils/log.js";
-import type { Room, User } from "../types/types.js";
-import { send } from "../utils/send.js";
+import { log } from "../utils/log.ts";
+import type { Room, User } from "../types/types.ts";
+import { send } from "../utils/send.ts";
 
 class RoomManager {
   private rooms = new Map<string, Room>();

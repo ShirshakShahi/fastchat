@@ -1,11 +1,11 @@
 import type { IncomingMessage } from "http";
 import url from "url";
-import { log } from "../utils/log.js";
-import { send } from "../utils/send.js";
-import { publicUser } from "../utils/publicUser.js";
-import { routeMessage } from "./router.js";
-import RoomManager from "../managers/RoomManager.js";
-import type { Client, User } from "../types/types.js";
+import { log } from "../utils/log.ts";
+import { send } from "../utils/send.ts";
+import { publicUser } from "../utils/publicUser.ts";
+import { routeMessage } from "./router.ts";
+import RoomManager from "../managers/RoomManager.ts";
+import type { Client, User } from "../types/types.ts";
 
 export function handleSocket(ws: Client, req: IncomingMessage): void {
   log.conn("new connection");

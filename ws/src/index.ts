@@ -1,8 +1,8 @@
 import { WebSocketServer } from "ws";
 import chalk from "chalk";
-import { log } from "./utils/log.js";
-import { handleSocket } from "./handlers/socket.js";
-import type { Client } from "./types/types.js";
+import { log } from "./utils/log.ts";
+import { handleSocket } from "./handlers/socket.ts";
+import type { Client } from "./types/types.ts";
 
 const PORT = Number(process.env.PORT) || 8080;
 const MAX_PAYLOAD = 16 * 1024;

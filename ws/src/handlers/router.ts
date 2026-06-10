@@ -1,7 +1,7 @@
 import type { WebSocket } from "ws";
-import RoomManager from "../managers/RoomManager.js";
-import { send } from "../utils/send.js";
-import { publicUser } from "../utils/publicUser.js";
+import RoomManager from "../managers/RoomManager.ts";
+import { send } from "../utils/send.ts";
+import { publicUser } from "../utils/publicUser.ts";
 
 export function routeMessage(
   message: any,
