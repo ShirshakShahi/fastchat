@@ -8,7 +8,7 @@ import type {
   User,
 } from "../lib/chat-types";
 
-const WS_BASE = "ws://localhost:8080";
+const WS_BASE = "wss://fastchat-v0wk.onrender.com";
 const NAME_KEY = "fastchat:name";
 const TOKEN_KEY = "fastchat:token";
 
