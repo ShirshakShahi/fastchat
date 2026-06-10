@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { buildMeta } from "../lib/seo";
 import { useRoomSocket } from "../hooks/useRoomSocket";
 import { RoomHeader } from "../components/chat/RoomHeader";
 import { Sidebar } from "../components/chat/Sidebar";
@@ -17,6 +18,13 @@ import {
 } from "../components/chat/StatusScreen";
 
 const NAME_KEY = "fastchat:name";
+
+export function meta() {
+  return buildMeta({
+    description:
+      "You've been invited to a private FastChat space. Pick a name, knock, and the admin will let you in.",
+  });
+}
 
 export default function ChatRoom() {
   const params = useParams();

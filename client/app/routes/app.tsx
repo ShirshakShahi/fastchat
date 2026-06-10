@@ -3,6 +3,14 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight, Plus, LogIn, Dices, ShieldCheck } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { buildMeta } from "../lib/seo";
+
+export function meta() {
+  return buildMeta({
+    description:
+      "Pick a display name, then spin up a fresh room or join one with a code. Whoever creates the room holds the keys.",
+  });
+}
 
 const NAME_KEY = "fastchat:name";
 
