@@ -37,7 +37,7 @@ export default function ChatRoom() {
 
   function leave() {
     room.leave();
-    navigate("/app");
+    navigate("/app", { replace: true });
   }
 
   return (
@@ -56,7 +56,10 @@ export default function ChatRoom() {
 
       {(room.joinState === "rejected" || room.joinState === "kicked") && (
         <StatusScreen code={params.code}>
-          <TerminalBody state={room.joinState} onLeave={() => navigate("/app")} />
+          <TerminalBody
+            state={room.joinState}
+            onLeave={() => navigate("/app", { replace: true })}
+          />
         </StatusScreen>
       )}
 

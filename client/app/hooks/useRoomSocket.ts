@@ -65,7 +65,7 @@ export function useRoomSocket(code: string | undefined): RoomSocket {
 
   useEffect(() => {
     const name = (localStorage.getItem(NAME_KEY) ?? "").trim();
-    const token = localStorage.getItem(TOKEN_KEY) ?? "";
+    const token = sessionStorage.getItem(TOKEN_KEY) ?? "";
 
     const qs = new URLSearchParams({ roomId: code ?? "" });
     if (name) qs.set("name", name);
@@ -102,7 +102,7 @@ export function useRoomSocket(code: string | undefined): RoomSocket {
 
         case "session":
           userIdRef.current = data.payload.userId;
-          localStorage.setItem(TOKEN_KEY, data.payload.token);
+          sessionStorage.setItem(TOKEN_KEY, data.payload.token);
           break;
 
         case "pending-approval":
