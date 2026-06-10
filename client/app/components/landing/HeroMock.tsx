@@ -8,7 +8,7 @@ export function HeroMock() {
           Wants to join
         </p>
         <div className="mt-2 flex items-center justify-between gap-2">
-          <span className="font-medium text-ink">gg.cipot</span>
+          <span className="font-medium text-ink">somash</span>
           <div className="flex gap-1.5">
             <span className="grid size-7 place-items-center rounded-lg bg-online/15 text-online">
               <Check size={14} />
@@ -32,11 +32,11 @@ export function HeroMock() {
         </div>
 
         <div className="space-y-3.5 px-5 py-6">
-          <Bubble side="left" name="Mara">
+          <Bubble side="left" name="jaya">
             where are we eating tonight?
           </Bubble>
-          <Bubble side="right">tacos. non-negotiable 🌮</Bubble>
-          <Bubble side="left" name="Theo">
+          <Bubble side="right">momos from momomia. non-negotiable</Bubble>
+          <Bubble side="left" name="cipot">
             joined — i'm in, i'm starving 😄
           </Bubble>
         </div>

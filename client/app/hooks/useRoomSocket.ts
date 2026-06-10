@@ -40,7 +40,10 @@ function pushSystem(
   ]);
 }
 
-export function useRoomSocket(code: string | undefined): RoomSocket {
+export function useRoomSocket(
+  code: string | undefined,
+  enabled: boolean = true,
+): RoomSocket {
   const socketRef = useRef<WebSocket | null>(null);
   const userIdRef = useRef("");
   const reasonRef = useRef("");
@@ -64,6 +67,8 @@ export function useRoomSocket(code: string | undefined): RoomSocket {
   const isAdmin = adminId !== null && adminId === userIdRef.current;
 
   useEffect(() => {
+    if (!enabled) return;
+
     const name = (localStorage.getItem(NAME_KEY) ?? "").trim();
     const token = sessionStorage.getItem(TOKEN_KEY) ?? "";
 
@@ -199,7 +204,7 @@ export function useRoomSocket(code: string | undefined): RoomSocket {
       typingTimersRef.current.forEach(clearTimeout);
       typingTimersRef.current.clear();
     };
-  }, [code]);
+  }, [code, enabled]);
 
   function emit(type: string, payload?: any) {
     const socket = socketRef.current;

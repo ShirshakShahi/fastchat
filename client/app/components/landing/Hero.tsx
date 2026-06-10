@@ -57,10 +57,6 @@ export function Hero() {
             How it works
           </a>
         </div>
-
-        <p className="mt-6 font-mono text-xs text-muted">
-          fastchat.app/space/<span className="text-ink">indigo-otter-9f2c</span>
-        </p>
       </div>
 
       <HeroMock />

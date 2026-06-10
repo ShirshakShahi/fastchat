@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -8,6 +8,7 @@ import { useRoomSocket } from "../hooks/useRoomSocket";
 import { RoomHeader } from "../components/chat/RoomHeader";
 import { Sidebar } from "../components/chat/Sidebar";
 import { ChatPanel } from "../components/chat/ChatPanel";
+import { NamePrompt } from "../components/chat/NamePrompt";
 import {
   ConnectingBody,
   PendingBody,
@@ -15,12 +16,31 @@ import {
   TerminalBody,
 } from "../components/chat/StatusScreen";
 
+const NAME_KEY = "fastchat:name";
+
 export default function ChatRoom() {
   const params = useParams();
   const navigate = useNavigate();
-  const room = useRoomSocket(params.code);
+
+  const [ready, setReady] = useState(false);
+  const [askName, setAskName] = useState(false);
+  const room = useRoomSocket(params.code, ready);
 
   const [input, setInput] = useState("");
+
+  useEffect(() => {
+    const hasName = Boolean((localStorage.getItem(NAME_KEY) ?? "").trim());
+    if (hasName) setReady(true);
+    else setAskName(true);
+  }, []);
+
+  function chooseName(name: string) {
+    const clean = name.trim();
+    if (clean) localStorage.setItem(NAME_KEY, clean);
+    else localStorage.removeItem(NAME_KEY);
+    setAskName(false);
+    setReady(true);
+  }
 
   function handleChange(v: string) {
     setInput(v);
@@ -42,19 +62,25 @@ export default function ChatRoom() {
 
   return (
     <>
-      {room.joinState === "connecting" && (
+      {!ready && (
+        <StatusScreen code={params.code}>
+          {askName ? <NamePrompt onContinue={chooseName} /> : <ConnectingBody />}
+        </StatusScreen>
+      )}
+
+      {ready && room.joinState === "connecting" && (
         <StatusScreen code={params.code}>
           <ConnectingBody />
         </StatusScreen>
       )}
 
-      {room.joinState === "pending" && (
+      {ready && room.joinState === "pending" && (
         <StatusScreen code={params.code}>
           <PendingBody />
         </StatusScreen>
       )}
 
-      {(room.joinState === "rejected" || room.joinState === "kicked") && (
+      {ready && (room.joinState === "rejected" || room.joinState === "kicked") && (
         <StatusScreen code={params.code}>
           <TerminalBody
             state={room.joinState}
@@ -63,7 +89,7 @@ export default function ChatRoom() {
         </StatusScreen>
       )}
 
-      {room.joinState === "joined" && (
+      {ready && room.joinState === "joined" && (
         <main className="relative min-h-screen px-4 py-4 sm:px-6 sm:py-5">
           <div className="mx-auto flex h-[calc(100vh-2rem)] max-w-6xl flex-col gap-3">
             <RoomHeader
