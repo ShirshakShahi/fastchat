@@ -4,7 +4,7 @@ Real-time chat rooms you control: create a space, share the code, approve who ge
 
 >  **Fully in-memory.** No database. Rooms live in RAM, are created on first connect, and vanish when the last person leaves. A restart wipes everything.
 
-> The web client is in progress — this README covers the WebSocket server.
+Two apps in one repo: a WebSocket **server** (`ws/`) and a React **client** (`client/`).
 
 ## Features
 
@@ -20,15 +20,27 @@ Real-time chat rooms you control: create a space, share the code, approve who ge
 
 ## Run
 
-**Stack:** Node 24+ · [`ws`](https://github.com/websockets/ws) · TypeScript (native, no build) · `chalk`
+Start both apps in separate terminals.
+
+**Server** — Node 24+ · [`ws`](https://github.com/websockets/ws) · TypeScript (native, no build) · `chalk`
 
 ```bash
 cd ws
 npm install
-npm run dev        # node --watch src/index.ts
+npm run dev        # node --watch src/index.ts → ws://localhost:8080
 ```
 
-Listens on `ws://localhost:8080` (`PORT` to override). Also: `npm start`, `npm run typecheck`.
+`PORT` to override. Also: `npm start`, `npm run typecheck`.
+
+**Client** — React 19 · React Router 7 · Tailwind 4 · Vite
+
+```bash
+cd client
+npm install
+npm run dev        # → http://localhost:5173
+```
+
+The client expects the server at `ws://localhost:8080`.
 
 ## Connecting
 
@@ -70,14 +82,22 @@ Every message is `{ type, payload }`.
 ## Structure
 
 ```
-ws/src
-├── index.ts          bootstrap: server, heartbeat, wiring
-├── types/            User, Room, Client
-├── utils/            send · log · publicUser · token
-├── managers/         RoomManager — all in-memory state
+ws/src                          server
+├── index.ts                    bootstrap: server, heartbeat, wiring
+├── types/                      User, Room, Client
+├── utils/                      send · log · publicUser · token
+├── managers/                   RoomManager — all in-memory state
 └── handlers/
-    ├── socket.ts     per-connection lifecycle
-    └── router.ts     dispatch by message type
+    ├── socket.ts               per-connection lifecycle
+    └── router.ts               dispatch by message type
+
+client/app                      client
+├── routes/                     home (landing) · app (join/create) · ChatRoom
+├── hooks/useRoomSocket.ts      all WebSocket wiring + state
+├── components/
+│   ├── landing/                Navbar · Hero · Features · Footer · …
+│   └── chat/                   RoomHeader · Sidebar · ChatPanel · StatusScreen
+└── lib/chat-types.ts           shared client types
 ```
 
 ## Notes
