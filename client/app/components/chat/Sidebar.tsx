@@ -8,6 +8,8 @@ export function Sidebar({
   adminId,
   isAdmin,
   selfId,
+  open,
+  onClose,
   onApprove,
   onReject,
   onKick,
@@ -17,6 +19,8 @@ export function Sidebar({
   adminId: string | null;
   isAdmin: boolean;
   selfId: string;
+  open: boolean;
+  onClose: () => void;
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onKick: (id: string) => void;
@@ -32,7 +36,20 @@ export function Sidebar({
   );
 
   return (
-    <aside className="hidden min-h-0 flex-col overflow-hidden rounded-2xl border border-line bg-card md:flex">
+    <>
+      {open && (
+        <div
+          onClick={onClose}
+          aria-hidden
+          className="fixed inset-0 z-40 bg-ink/40 md:hidden"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex min-h-0 w-72 max-w-[82%] flex-col overflow-hidden border-r border-line bg-card transition-transform duration-300 md:static md:z-auto md:w-auto md:max-w-none md:translate-x-0 md:rounded-2xl md:border ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
       {isAdmin && requests.length > 0 && (
         <div className="border-b border-line bg-accent-soft/40 p-3">
           <p className="mb-2 flex items-center gap-1.5 px-1 text-[11px] font-semibold uppercase tracking-wider text-accent-ink">
@@ -52,14 +69,14 @@ export function Sidebar({
                   <button
                     onClick={() => onApprove(r.userId)}
                     title="Approve"
-                    className="grid size-7 place-items-center rounded-lg bg-online/15 text-online transition-colors hover:bg-online hover:text-white"
+                    className="grid size-7 cursor-pointer place-items-center rounded-lg bg-online/15 text-online transition-colors hover:bg-online hover:text-white"
                   >
                     <Check size={14} />
                   </button>
                   <button
                     onClick={() => onReject(r.userId)}
                     title="Decline"
-                    className="grid size-7 place-items-center rounded-lg bg-accent/12 text-accent transition-colors hover:bg-accent hover:text-white"
+                    className="grid size-7 cursor-pointer place-items-center rounded-lg bg-accent/12 text-accent transition-colors hover:bg-accent hover:text-white"
                   >
                     <X size={14} />
                   </button>
@@ -72,7 +89,16 @@ export function Sidebar({
 
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <h2 className="font-display text-lg font-medium text-ink">Members</h2>
-        <span className="font-mono text-xs text-muted">{users.length}</span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-muted">{users.length}</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid size-7 cursor-pointer place-items-center rounded-lg text-muted transition-colors hover:bg-paper-2 hover:text-ink md:hidden"
+          >
+            <X size={16} />
+          </button>
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 space-y-0.5 overflow-y-auto p-2">
@@ -109,7 +135,7 @@ export function Sidebar({
                   <button
                     onClick={() => onKick(user.userId)}
                     title={`Remove ${user.name}`}
-                    className="grid size-7 place-items-center rounded-lg text-muted opacity-0 transition-all hover:bg-accent/12 hover:text-accent group-hover:opacity-100"
+                    className="grid size-7 shrink-0 cursor-pointer place-items-center rounded-lg text-muted opacity-100 transition-all hover:bg-accent/12 hover:text-accent md:opacity-0 md:group-hover:opacity-100"
                   >
                     <UserMinus size={14} />
                   </button>
@@ -127,6 +153,7 @@ export function Sidebar({
             : "The admin approves who joins this room."}
         </p>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

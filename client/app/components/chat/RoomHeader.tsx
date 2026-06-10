@@ -7,11 +7,15 @@ export function RoomHeader({
   code,
   online,
   status,
+  pendingCount,
+  onOpenMembers,
   onLeave,
 }: {
   code: string;
   online: number;
   status: ConnectionStatus;
+  pendingCount: number;
+  onOpenMembers: () => void;
   onLeave: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -57,17 +61,28 @@ export function RoomHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="hidden items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5 text-xs font-medium text-ink-soft sm:flex">
+        <button
+          type="button"
+          onClick={onOpenMembers}
+          className="relative flex cursor-pointer items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5 text-xs font-medium text-ink-soft md:hidden"
+        >
+          <Users size={13} />
+          {online}
+          {pendingCount > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-accent ring-2 ring-card" />
+          )}
+        </button>
+        <span className="hidden items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5 text-xs font-medium text-ink-soft md:flex">
           <Users size={13} />
           {online}
         </span>
         <StatusDot status={status} />
         <button
           onClick={onLeave}
-          className="flex items-center gap-1.5 rounded-full border border-line-strong px-3 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:border-accent hover:text-accent"
+          className="flex cursor-pointer items-center gap-1.5 rounded-full border border-line-strong px-3 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:border-accent hover:text-accent"
         >
           <LogOut size={13} />
-          Leave
+          <span className="hidden sm:inline">Leave</span>
         </button>
       </div>
     </header>

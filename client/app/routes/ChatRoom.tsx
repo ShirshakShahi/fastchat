@@ -27,6 +27,7 @@ export default function ChatRoom() {
   const room = useRoomSocket(params.code, ready);
 
   const [input, setInput] = useState("");
+  const [showMembers, setShowMembers] = useState(false);
 
   useEffect(() => {
     const hasName = Boolean((localStorage.getItem(NAME_KEY) ?? "").trim());
@@ -90,12 +91,14 @@ export default function ChatRoom() {
       )}
 
       {ready && room.joinState === "joined" && (
-        <main className="relative min-h-screen px-4 py-4 sm:px-6 sm:py-5">
-          <div className="mx-auto flex h-[calc(100vh-2rem)] max-w-6xl flex-col gap-3">
+        <main className="relative min-h-dvh p-3 sm:p-4">
+          <div className="mx-auto flex h-[calc(100dvh-1.5rem)] max-w-6xl flex-col gap-3 sm:h-[calc(100dvh-2rem)]">
             <RoomHeader
               code={params.code ?? ""}
               online={room.users.length}
               status={room.connectionStatus}
+              pendingCount={room.requests.length}
+              onOpenMembers={() => setShowMembers(true)}
               onLeave={leave}
             />
 
@@ -106,6 +109,8 @@ export default function ChatRoom() {
                 adminId={room.adminId}
                 isAdmin={room.isAdmin}
                 selfId={room.selfId}
+                open={showMembers}
+                onClose={() => setShowMembers(false)}
                 onApprove={room.approve}
                 onReject={room.reject}
                 onKick={room.kick}
