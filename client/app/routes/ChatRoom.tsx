@@ -19,8 +19,10 @@ import {
 
 const NAME_KEY = "fastchat:name";
 
-export function meta() {
+export function meta({ location }: { location: { pathname: string } }) {
   return buildMeta({
+    path: location.pathname,
+    noindex: true,
     description:
       "You've been invited to a private FastChat space. Pick a name, knock, and the admin will let you in.",
   });

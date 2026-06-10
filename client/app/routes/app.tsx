@@ -7,6 +7,7 @@ import { buildMeta } from "../lib/seo";
 
 export function meta() {
   return buildMeta({
+    path: "/app",
     description:
       "Pick a display name, then spin up a fresh room or join one with a code. Whoever creates the room holds the keys.",
   });

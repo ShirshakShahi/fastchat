@@ -11,8 +11,10 @@ import type { Route } from "./+types/root";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "icon", type: "image/png", href: "/favicon.png" },
-  { rel: "apple-touch-icon", href: "/favicon.png" },
+  { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
+  { rel: "icon", type: "image/png", sizes: "256x256", href: "/favicon.png" },
+  { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+  { rel: "manifest", href: "/site.webmanifest" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -31,6 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#f3f0e7" />
         <Meta />
         <Links />
       </head>

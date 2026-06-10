@@ -1,0 +1,21 @@
+{
+  "name": "FastChat",
+  "short_name": "FastChat",
+  "description": "Real-time chat rooms you control. Create a space, share the code, approve who gets in.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#f3f0e7",
+  "theme_color": "#f3f0e7",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
