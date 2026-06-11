@@ -117,6 +117,7 @@ export function useRoomSocket(
         case "joined":
           setJoinState("joined");
           setUsers(data.payload.users ?? []);
+          setMessages(data.payload.messages)
           setAdminId(data.payload.adminId ?? null);
           toast.success(data.payload.message);
           break;
