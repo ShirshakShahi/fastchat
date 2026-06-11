@@ -129,10 +129,14 @@ export default function ChatRoom() {
               <ChatPanel
                 messages={room.messages}
                 selfId={room.selfId}
+                users={room.users}
                 typingUsers={room.typingUsers}
                 value={input}
                 onChange={handleChange}
                 onSend={handleSend}
+                onReact={(messageId, reaction) =>
+                  room.sendReaction(reaction, messageId)
+                }
                 disabled={room.connectionStatus !== "connected"}
               />
             </div>

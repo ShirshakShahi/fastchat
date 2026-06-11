@@ -1,7 +1,9 @@
 export interface Message {
+  id:string;
   userId: string;
   name: string;
   content: string;
+  reactions?: Record<string, string[]>;
   timestamp?: string;
   system?: boolean;
 }

@@ -3,6 +3,8 @@ import RoomManager from "../managers/RoomManager.ts";
 import { send } from "../utils/send.ts";
 import { publicUser } from "../utils/publicUser.ts";
 
+const ALLOWED_REACTIONS = ["haha", "sad", "party", "like", "angry"];
+
 export function routeMessage(
   message: any,
   roomId: string,
@@ -45,6 +47,35 @@ export function routeMessage(
       roomManager.broadcast(roomId, {
         type: "message-received",
         payload: newMessage,
+      });
+      break;
+    }
+
+    case "send-reaction": {
+      const user = roomManager.getUser(userId);
+      const room = roomManager.getRoom(roomId);
+      if (!user || !room) return;
+
+      const messageId = message.payload?.messageId;
+      const reaction = message.payload?.reaction;
+      if (typeof messageId !== "string" || !ALLOWED_REACTIONS.includes(reaction)) {
+        return;
+      }
+
+      const target = room.messages.get(messageId);
+      if (!target) return;
+
+      const reactedBy = (target.reactions[reaction] ??= []);
+      const existing = reactedBy.indexOf(userId);
+      const op = existing === -1 ? "added" : "removed";
+
+      if (existing === -1) reactedBy.push(userId);
+      else reactedBy.splice(existing, 1);
+      if (reactedBy.length === 0) delete target.reactions[reaction];
+
+      roomManager.broadcast(roomId, {
+        type: "reaction-updated",
+        payload: { messageId, reaction, userId, op },
       });
       break;
     }

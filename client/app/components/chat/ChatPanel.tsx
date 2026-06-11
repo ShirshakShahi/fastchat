@@ -1,6 +1,11 @@
-import { useEffect, useRef } from "react";
-import { ArrowUpRight, DoorOpen } from "lucide-react";
-import type { JoinRequest, Message } from "../../lib/chat-types";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight, DoorOpen, SmilePlus } from "lucide-react";
+import type { JoinRequest, Message, User } from "../../lib/chat-types";
+import { getColor, reactions } from "../../constants/reactions";
+
+const reactionIcon = Object.fromEntries(reactions.map((r) => [r.id, r.emoji]));
+
+const LONG_PRESS_MS = 500;
 
 function formatTime(ts?: string) {
   if (!ts) return "";
@@ -20,21 +25,53 @@ function typingLabel(users: JoinRequest[]) {
 export function ChatPanel({
   messages,
   selfId,
+  users,
   typingUsers,
   value,
   onChange,
   onSend,
+  onReact,
   disabled,
 }: {
   messages: Message[];
   selfId: string;
+  users: User[];
   typingUsers: JoinRequest[];
   value: string;
   onChange: (v: string) => void;
   onSend: () => void;
+  onReact: (messageId: string, reaction: string) => void;
   disabled: boolean;
 }) {
   const endRef = useRef<HTMLDivElement>(null);
+
+  function reactorNames(userIds: string[]): string {
+    return userIds
+      .map((id) =>
+        id === selfId
+          ? "You"
+          : (users.find((u) => u.userId === id)?.name ?? "someone"),
+      )
+      .sort((x, y) => (x === "You" ? -1 : y === "You" ? 1 : 0))
+      .join(", ");
+  }
+
+  const [showReactions, setShowReactions] = useState<Record<string, boolean>>({});
+
+  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function startLongPress(messageId: string) {
+    longPressRef.current = setTimeout(() => {
+      setShowReactions((p) => ({ ...p, [messageId]: true }));
+    }, LONG_PRESS_MS);
+  }
+
+  function cancelLongPress() {
+    if (longPressRef.current) {
+      clearTimeout(longPressRef.current);
+      longPressRef.current = null;
+    }
+  }
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -55,10 +92,10 @@ export function ChatPanel({
           </div>
         ) : (
           <div className="space-y-2.5">
-            {messages.map((m, i) => {
+            {messages.map((m) => {
               if (m.system) {
                 return (
-                  <div key={i} className="flex justify-center py-1">
+                  <div key={m.id} className="flex justify-center py-1">
                     <span className="rounded-full bg-paper-2 px-3 py-1 text-xs text-muted">
                       {m.content}
                     </span>
@@ -68,11 +105,14 @@ export function ChatPanel({
               const mine = m.userId === selfId;
               return (
                 <div
-                  key={i}
-                  className={`flex ${mine ? "justify-end" : "justify-start"}`}
+                  key={m.id}
+                  className={`flex items-center group ${mine ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[78%] rounded-2xl px-3.5 py-2 ${
+                    onTouchStart={mine ? undefined : () => startLongPress(m.id)}
+                    onTouchEnd={mine ? undefined : cancelLongPress}
+                    onTouchMove={mine ? undefined : cancelLongPress}
+                    className={`max-w-[78%] rounded-2xl px-3.5 py-2 max-sm:select-none ${
                       mine
                         ? "rounded-br-md bg-ink text-paper"
                         : "rounded-bl-md bg-paper-2 text-ink"
@@ -83,7 +123,9 @@ export function ChatPanel({
                         {m.name}
                       </p>
                     )}
-                    <p className="break-words leading-relaxed">{m.content}</p>
+                    <p className="wrap-break-word leading-relaxed">
+                      {m.content}
+                    </p>
                     {m.timestamp && (
                       <p
                         className={`mt-1 text-[10px] tabular-nums ${
@@ -93,7 +135,80 @@ export function ChatPanel({
                         {formatTime(m.timestamp)}
                       </p>
                     )}
+                    {m.reactions && Object.keys(m.reactions).length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {Object.entries(m.reactions).map(([rid, userIds]) => {
+                          const Icon = reactionIcon[rid];
+                          const reacted = userIds.includes(selfId);
+                          return (
+                            <button
+                              key={rid}
+                              type="button"
+                              onClick={() => onReact(m.id, rid)}
+                              aria-label={`${rid} — ${reactorNames(userIds)}`}
+                              className={`group/chip relative flex cursor-pointer items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] tabular-nums transition-colors ${
+                                mine
+                                  ? reacted
+                                    ? "bg-paper text-ink"
+                                    : "bg-paper/20 text-paper hover:bg-paper/30"
+                                  : reacted
+                                    ? "bg-accent-soft text-accent-ink"
+                                    : "border border-line bg-card text-ink-soft hover:bg-paper-2"
+                              }`}
+                            >
+                              {Icon ? (
+                                <Icon size={12} className={getColor(rid)} />
+                              ) : (
+                                rid
+                              )}
+                              {userIds.length}
+                              <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg bg-ink px-2 py-1 text-[10px] font-medium text-paper opacity-0 shadow-lg transition-opacity duration-150 group-hover/chip:opacity-100">
+                                {reactorNames(userIds)}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
+                  {!mine && (
+                    <div className="relative ml-2">
+                      <SmilePlus
+                        className={`size-5 cursor-pointer text-muted hover:text-accent ${
+                          showReactions[m.id]
+                            ? "block"
+                            : "hidden group-hover:block"
+                        }`}
+                        onClick={() => {
+                          setShowReactions((p) => ({
+                            ...p,
+                            [m.id]: !p[m.id],
+                          }));
+                        }}
+                      />
+                      {showReactions[m.id] && (
+                        <div className="absolute bottom-full left-1/2 z-10 mb-1.5 flex -translate-x-1/2 gap-0.5 rounded-full border border-line bg-card p-1 shadow-[0_8px_24px_-8px_rgba(26,25,22,0.35)]">
+                          {reactions.map(({ id, emoji: Icon }) => (
+                            <button
+                              key={id}
+                              type="button"
+                              title={id}
+                              onClick={() => {
+                                onReact(m.id, id);
+                                setShowReactions((p) => ({
+                                  ...p,
+                                  [m.id]: false,
+                                }));
+                              }}
+                              className="grid size-7 cursor-pointer place-items-center rounded-full transition-colors hover:bg-paper-2"
+                            >
+                              <Icon size={15} className={getColor(id)} />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

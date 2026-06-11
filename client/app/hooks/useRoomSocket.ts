@@ -8,7 +8,9 @@ import type {
   User,
 } from "../lib/chat-types";
 
-const WS_BASE = "wss://fastchat-v0wk.onrender.com";
+const WS_BASE = import.meta.env.DEV
+  ? "ws://localhost:8080"
+  : "wss://fastchat-v0wk.onrender.com";
 const NAME_KEY = "fastchat:name";
 const TOKEN_KEY = "fastchat:token";
 
@@ -28,6 +30,7 @@ export interface RoomSocket {
   reject: (userId: string) => void;
   kick: (userId: string) => void;
   leave: () => void;
+  sendReaction: (r: string, m: string) => void;
 }
 
 function pushSystem(
@@ -36,7 +39,13 @@ function pushSystem(
 ) {
   setMessages((prev) => [
     ...prev,
-    { userId: "__system__", name: "", content, system: true },
+    {
+      userId: "__system__",
+      name: "",
+      content,
+      system: true,
+      id: crypto.randomUUID(),
+    },
   ]);
 }
 
@@ -117,7 +126,7 @@ export function useRoomSocket(
         case "joined":
           setJoinState("joined");
           setUsers(data.payload.users ?? []);
-          setMessages(data.payload.messages)
+          setMessages(data.payload.messages);
           setAdminId(data.payload.adminId ?? null);
           toast.success(data.payload.message);
           break;
@@ -185,12 +194,38 @@ export function useRoomSocket(
           setMessages((prev) => [
             ...prev,
             {
+              id: data.payload.id,
               userId: data.payload.userId,
               name: data.payload.name,
               content: data.payload.content,
               timestamp: data.payload.timestamp,
+              reactions: data.payload.reactions ?? {},
             },
           ]);
+          break;
+
+        case "reaction-updated":
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m.id !== data.payload.messageId) return m;
+
+              const { reaction, userId: reactorId, op } = data.payload;
+              const reactions = { ...(m.reactions ?? {}) };
+              const reactedBy = reactions[reaction] ?? [];
+
+              if (op === "added") {
+                if (!reactedBy.includes(reactorId)) {
+                  reactions[reaction] = [...reactedBy, reactorId];
+                }
+              } else {
+                const next = reactedBy.filter((id) => id !== reactorId);
+                if (next.length === 0) delete reactions[reaction];
+                else reactions[reaction] = next;
+              }
+
+              return { ...m, reactions };
+            }),
+          );
           break;
 
         case "user-typing":
@@ -279,5 +314,7 @@ export function useRoomSocket(
     reject: (userId) => emit("reject-join-request", { userId }),
     kick: (userId) => emit("kick-user", { userId }),
     leave: () => socketRef.current?.close(),
+    sendReaction: (r: string, mId: string) =>
+      emit("send-reaction", { reaction: r, messageId: mId }),
   };
 }
