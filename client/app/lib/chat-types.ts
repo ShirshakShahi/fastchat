@@ -12,10 +12,7 @@ export interface User {
   isAdmin?: boolean;
 }
 
-export interface JoinRequest {
-  userId: string;
-  name: string;
-}
+export interface JoinRequest extends Omit<User, "isAdmin">{}
 
 export type JoinState =
   | "connecting"

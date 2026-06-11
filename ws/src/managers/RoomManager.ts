@@ -28,6 +28,7 @@ class RoomManager {
       userIds: new Set(),
       pending: new Map(),
       createdAt: new Date(),
+      messages: new Map(),
       maxUsers,
       ownerId,
     };

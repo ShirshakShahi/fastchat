@@ -14,18 +14,37 @@ export function routeMessage(
   switch (message.type) {
     case "send-message": {
       const user = roomManager.getUser(userId);
-      if (!user) return;
+      const room = roomManager.getRoom(roomId);
+      if (!user || !room) return;
+
+      const content = message.payload?.content;
+      if (
+        typeof content !== "string" ||
+        !content.trim() ||
+        content.length > 2000
+      ) {
+        return;
+      }
 
       user.lastActivity = new Date();
 
+      const newMessage = {
+        id: crypto.randomUUID(),
+        content,
+        userId,
+        name: user.name,
+        timestamp: new Date(),
+        reactions: {},
+      };
+
+      room.messages.set(newMessage.id, newMessage);
+      if (room.messages.size > 200) {
+        room.messages.delete(room.messages.keys().next().value!);
+      }
+
       roomManager.broadcast(roomId, {
         type: "message-received",
-        payload: {
-          content: message.payload.content,
-          userId: userId,
-          name: user.name,
-          timestamp: new Date(),
-        },
+        payload: newMessage,
       });
       break;
     }
@@ -84,6 +103,7 @@ export function routeMessage(
           users: roomManager
             .getRoomUsers(roomId)
             .map((u) => publicUser(roomManager, roomId, u)),
+          messages: room ? [...room.messages.values()] : [],
         },
       });
 

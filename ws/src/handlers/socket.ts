@@ -75,6 +75,7 @@ export function handleSocket(ws: Client, req: IncomingMessage): void {
         users: roomManager
           .getRoomUsers(roomId)
           .map((u) => publicUser(roomManager, roomId, u)),
+        messages: [],
       },
     });
   } else {
